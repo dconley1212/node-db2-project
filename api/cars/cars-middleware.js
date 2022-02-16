@@ -1,5 +1,6 @@
 const { OPEN_READWRITE } = require("sqlite3");
 const { getByVin, getById } = require("./cars-model");
+const vinValidator = require("vin-validator");
 
 const checkCarId = async (req, res, next) => {
   try {
@@ -31,13 +32,24 @@ const checkCarPayload = (req, res, next) => {
   }
 };
 
-const checkVinNumberValid = (req, res, next) => {
+const checkVinNumberValid = async (req, res, next) => {
   const { vin } = req.body;
-  if (typeof vin != "string") {
-    next({ status: 400, message: `vin is invalid` });
-  } else {
-    next();
+  try {
+    const isValidVin = await vinValidator.validate(vin);
+    if (isValidVin === true) {
+      next();
+    } else {
+      next({ status: 400, message: `vin ${vin} is invalid` });
+    }
+  } catch (err) {
+    next(err);
   }
+
+  // if (typeof vin === "string") {
+  //   next();
+  // } else {
+  //   next({ status: 400, message: `vin ${vin} is invalid` });
+  // }
 };
 
 const checkVinNumberUnique = async (req, res, next) => {
