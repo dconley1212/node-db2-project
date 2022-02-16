@@ -1,6 +1,6 @@
 // DO YOUR MAGIC
 const express = require("express");
-// const db = require("../../data/db-config");
+const dbConfig = require("../../data/db-config");
 const Cars = require("./cars-model");
 const {
   checkCarId,
@@ -19,15 +19,24 @@ router.get("/", (req, res, next) => {
     .catch(next);
 });
 
-router.get("/:id", checkCarId, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const car = await Cars.getById(id);
-    res.status(200).json(car);
-  } catch (error) {
-    next(error);
-  }
+router.get("/:id", checkCarId, (req, res, next) => {
+  res.status(200).json(req.body);
 });
+
+router.post(
+  "/",
+  checkCarPayload,
+  checkVinNumberUnique,
+  checkVinNumberValid,
+  async (req, res, next) => {
+    try {
+      const newCar = await Cars.create(req.body);
+      res.status(201).json(newCar);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 router.use((err, req, res, next) => {
   res.status(err.status || 500).json({

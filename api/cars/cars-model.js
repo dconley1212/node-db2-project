@@ -12,15 +12,22 @@ const getById = async (id) => {
   return carById;
 };
 
-const create = async (id, car) => {
+const getByVin = async (vin) => {
+  const selectedVin = await dbConfig("cars").where("vin", vin).first();
+
+  return selectedVin;
+};
+
+const create = async (car) => {
   // DO YOUR MAGIC
-  const createNewPost = await dbConfig("cars").insert(car);
-  const newPost = await getById(createNewPost);
-  return newPost;
+  const newPost = await dbConfig("cars").insert(car);
+  const getNewPost = await getById(newPost);
+  return getNewPost;
 };
 
 module.exports = {
   getAll,
+  getByVin,
   getById,
   create,
 };
